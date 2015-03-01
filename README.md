@@ -68,6 +68,7 @@ var db = naivedb('/tmp/database.json', { safeMode: true, pretty: true } );
 Pass in the path to your db, if it doesnt exit you will get a fatal error, that's the computers way of telling you that you should have read the manual.
 
 `safeMode` - this defaults to `true`, if you set it to `false` then the db will not write to disk when the process exits, i'm not sure why you would want this turned off.
+
 `pretty` - again; this defaults to `true`, if you set it to `false` then the json is un-readable and you should probably be using a better database.
 
 ---
