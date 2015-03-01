@@ -7,6 +7,8 @@ module.exports = function( filename, options ){
 
   if( 'string' !== typeof filename ) throw new Error( 'invalid file name' );
   if( 'object' !== typeof options || !options ) options = {};
+  if( !options.safeMode ) options.safeMode = true;
+  if( !options.pretty ) options.pretty = true;
 
   var col = collection();
 
