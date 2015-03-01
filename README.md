@@ -19,7 +19,7 @@ It would be hard to make something that did less.
 Yep, those 2 squiggy brackets are your whole database, deal with it.
 
 ```bash
-echo '{}' > /tmp/venue.json
+echo '{}' > /tmp/database.json
 ```
 
 ## Usage
@@ -28,7 +28,7 @@ echo '{}' > /tmp/venue.json
 $ node
 > var naivedb = require('naivedb');
 undefined
-> var db = naivedb('/tmp/venue.json');
+> var db = naivedb('/tmp/database.json');
 undefined
 > db.set( 'foo', 'bar' );
 undefined
@@ -64,7 +64,7 @@ request
 
 ```javascript
 var naivedb = require('naivedb');
-var db = naivedb('/tmp/venue.json', { safeMode: true, pretty: true } );
+var db = naivedb('/tmp/database.json', { safeMode: true, pretty: true } );
 ```
 
 Pass in the path to your db, if it doesnt exit you will get a fatal error, that's the computers way of telling you that you should have read the manual.
