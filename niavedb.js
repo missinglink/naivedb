@@ -78,8 +78,6 @@ module.exports = function( filename, options ){
       return through.obj( function( chunk, enc, next ){
         niavedb.set( chunk[idprop], chunk );
         next();
-      }, function(){
-        niavedb.close();
       });
     },
     close: function(){
