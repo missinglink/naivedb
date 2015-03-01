@@ -12,11 +12,9 @@ npm install naivedb --save
 
 It would be hard to make something that did less.
 
----
-
 ## Create your database
 
-Yep, those 2 squiggy brackets are your whole database, deal with it.
+Yep, those 2 squiggly brackets are your whole database, deal with it.
 
 ```bash
 echo '{}' > /tmp/database.json
