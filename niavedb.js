@@ -62,6 +62,15 @@ module.exports = function( filename, options ){
       }
       else return done();
     },
+    writeSync: function(){
+      if( !niavedb.synced ){
+        var str = options.pretty
+          ? JSON.stringify( col.store, null, 2 )
+          : JSON.stringify( col.store );
+        fs.writeFileSync( path.resolve( filename ), str );
+        niavedb.synced = true;
+      }
+    },
     createWriteStream: function( idprop ){
       if( 'string' !== typeof idprop ) idprop = 'id';
       return through.obj( function( chunk, enc, next ){
@@ -73,12 +82,18 @@ module.exports = function( filename, options ){
     },
     close: function(){
       clearInterval( niavedb.interval );
-      niavedb.write( genericErrorHandler );
+      niavedb.writeSync();
     }
   };
 
+  // write to disk regularly on interval
   if( options.writeInterval ){
     niavedb.interval = setInterval( niavedb.write.bind( null, genericErrorHandler ), options.writeInterval );
+  }
+
+  // ensure data is written to disk on process termination
+  if( options.safeMode ){
+    process.on( 'exit', niavedb.close );
   }
 
   niavedb.readSync();
