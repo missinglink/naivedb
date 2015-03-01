@@ -1,63 +1,87 @@
 
 var fs = require('fs'),
-    path = require('path');
+    path = require('path'),
+    through = require('through2');
 
-module.exports = function( filename, options, errorback ){
+module.exports = function( filename, options ){
 
   if( 'string' !== typeof filename ) throw new Error( 'invalid file name' );
   if( 'object' !== typeof options || !options ) options = {};
-  if( 'function' !== typeof errorback ) errorback = console.error;
 
-  var store = collection();
+  var col = collection();
 
   var niavedb = {
     synced: false,
     interval: null,
     get: function( key ){
-      return store.get( key );
+      return col.get( key );
     },
     set: function( key, value ){
       niavedb.synced = false;
-      return store.set( key, value );
+      return col.set( key, value );
     },
     del: function( key ){
       niavedb.synced = false;
-      return store.del( key );
+      return col.del( key );
     },
-    read: function(){
-      var path = null;
-      try { path = path.resolve( filename ); }
-      catch( e ){ return errorback( e ); }
-
-      if( path )
-      fs.stat( path, function( err, stats ){
-        if( err ) return errorback( err );
-        fs.readFile( path, function( err, data ){
-          if( err ) return errorback( err );
-          store = collection( JSON.parse( data ) );
+    _validatePath: function( done ){
+      var filepath = null;
+      filepath = path.resolve( filename );
+      return filepath;
+    },
+    read: function( done ){
+      try { var filepath = niavedb._validatePath(); }
+      catch ( e ){ return done( e ); }
+      fs.stat( filepath, function( err, stats ){
+        if( err ) return done( e );
+        fs.readFile( filepath, { encoding: 'utf8' }, function( err, data ){
+          if( err ) return done( e );
+          col = collection( JSON.parse( data ) );
           niavedb.synced = true;
+          done( null, col );
         });
       });
     },
-    write: function(){
+    readSync: function(){
+      var filepath = niavedb._validatePath();
+      var stats = fs.statSync( filepath );
+      var data = fs.readFileSync( filepath, { encoding: 'utf8' } );
+      col = collection( JSON.parse( data ) );
+      niavedb.synced = true;
+    },
+    write: function( done ){
       if( !niavedb.synced ){
-        fs.writeFile( path.resolve( filename ), JSON.stringify( niavedb.data ), function( err ){
-          if( err ) throw new Error( err );
+        var str = options.pretty
+          ? JSON.stringify( col.store, null, 2 )
+          : JSON.stringify( col.store );
+        fs.writeFile( path.resolve( filename ), str, function( err ){
+          if( err ) return done( e );
           niavedb.synced = true;
+          done();
         });
       }
+      else return done();
+    },
+    createWriteStream: function( idprop ){
+      if( 'string' !== typeof idprop ) idprop = 'id';
+      return through.obj( function( chunk, enc, next ){
+        niavedb.set( chunk[idprop], chunk );
+        next();
+      }, function(){
+        niavedb.close();
+      });
     },
     close: function(){
       clearInterval( niavedb.interval );
-      niavedb.write();
+      niavedb.write( genericErrorHandler );
     }
   };
 
   if( options.writeInterval ){
-    niavedb.interval = setInterval( niavedb.write, options.writeInterval );
+    niavedb.interval = setInterval( niavedb.write.bind( null, genericErrorHandler ), options.writeInterval );
   }
 
-  niavedb.read();
+  niavedb.readSync();
 
   return niavedb;
 };
@@ -78,4 +102,8 @@ function collection( init ){
   };
 
   return cache;
+};
+
+function genericErrorHandler( err ){
+  if( err ) console.error( err );
 };
