@@ -20,6 +20,13 @@ Yep, those 2 squiggly brackets are your whole database, deal with it.
 echo '{}' > /tmp/database.json
 ```
 
+or you can do it with javascript..
+
+```javascript
+var fs = require('fs');
+fs.writeFileSync( '/tmp/database.json', '{}' );
+```
+
 ## Usage
 
 ```bash
