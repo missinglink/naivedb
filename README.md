@@ -82,6 +82,8 @@ Pass in the path to your db, if it doesnt exist you will get a fatal error, that
 
 ## License
 
+[Poetic Licence 1.0](https://github.com/alexgenaud/Poetic-License)
+
 ```
 This work ‘as-is’ we provide.
 No warranty express or implied.
